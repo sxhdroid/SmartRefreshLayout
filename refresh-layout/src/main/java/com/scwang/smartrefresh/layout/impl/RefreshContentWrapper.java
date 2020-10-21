@@ -9,11 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
+import android.widget.Space;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.NestedScrollingChild;
 import androidx.core.view.NestedScrollingParent;
-import androidx.legacy.widget.Space;
 import androidx.viewpager.widget.ViewPager;
 
 import com.scwang.smartrefresh.layout.api.RefreshContent;
@@ -27,10 +27,9 @@ import java.util.List;
 import java.util.Queue;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.scwang.smartrefresh.layout.util.ScrollBoundaryUtil.canScrollDown;
-import static com.scwang.smartrefresh.layout.util.ScrollBoundaryUtil.canScrollUp;
-import static com.scwang.smartrefresh.layout.util.ScrollBoundaryUtil.isTransformedTouchPointInView;
+import static com.scwang.smartrefresh.layout.util.SmartUtil.canScrollVertically;
 import static com.scwang.smartrefresh.layout.util.SmartUtil.isContentView;
+import static com.scwang.smartrefresh.layout.util.SmartUtil.isTransformedTouchPointInView;
 import static com.scwang.smartrefresh.layout.util.SmartUtil.measureViewHeight;
 import static com.scwang.smartrefresh.layout.util.SmartUtil.scrollListBy;
 
@@ -39,7 +38,7 @@ import static com.scwang.smartrefresh.layout.util.SmartUtil.scrollListBy;
  * Created by SCWANG on 2017/5/26.
  */
 @SuppressWarnings("WeakerAccess")
-public class RefreshContentWrapper implements RefreshContent , CoordinatorLayoutListener, AnimatorUpdateListener {
+public class RefreshContentWrapper implements RefreshContent, CoordinatorLayoutListener, AnimatorUpdateListener {
 
 //    protected int mHeaderHeight = Integer.MAX_VALUE;
 //    protected int mFooterHeight = mHeaderHeight - 1;
@@ -213,7 +212,6 @@ public class RefreshContentWrapper implements RefreshContent , CoordinatorLayout
 //    }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void setUpComponent(RefreshKernel kernel, View fixedHeader, View fixedFooter) {
         findScrollableView(mContentView, kernel);
 
@@ -221,32 +219,35 @@ public class RefreshContentWrapper implements RefreshContent , CoordinatorLayout
             mFixedHeader = fixedHeader;
             mFixedFooter = fixedFooter;
             ViewGroup frameLayout = new FrameLayout(mContentView.getContext());
+            int index = kernel.getRefreshLayout().getLayout().indexOfChild(mContentView);
             kernel.getRefreshLayout().getLayout().removeView(mContentView);
+            frameLayout.addView(mContentView, 0, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
-            frameLayout.addView(mContentView, MATCH_PARENT, MATCH_PARENT);
-            kernel.getRefreshLayout().getLayout().addView(frameLayout, layoutParams);
+            kernel.getRefreshLayout().getLayout().addView(frameLayout, index, layoutParams);
             mContentView = frameLayout;
             if (fixedHeader != null) {
-                fixedHeader.setClickable(true);
+                fixedHeader.setTag("fixed-top");
+//                fixedHeader.setClickable(true);
                 ViewGroup.LayoutParams lp = fixedHeader.getLayoutParams();
                 ViewGroup parent = (ViewGroup) fixedHeader.getParent();
-                int index = parent.indexOfChild(fixedHeader);
+                index = parent.indexOfChild(fixedHeader);
                 parent.removeView(fixedHeader);
                 lp.height = measureViewHeight(fixedHeader);
                 parent.addView(new Space(mContentView.getContext()), index, lp);
-                frameLayout.addView(fixedHeader);
+                frameLayout.addView(fixedHeader, 1, lp);
             }
             if (fixedFooter != null) {
-                fixedFooter.setClickable(true);
+                fixedFooter.setTag("fixed-bottom");
+//                fixedFooter.setClickable(true);
                 ViewGroup.LayoutParams lp = fixedFooter.getLayoutParams();
                 ViewGroup parent = (ViewGroup) fixedFooter.getParent();
-                int index = parent.indexOfChild(fixedFooter);
+                index = parent.indexOfChild(fixedFooter);
                 parent.removeView(fixedFooter);
                 FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(lp);
                 lp.height = measureViewHeight(fixedFooter);
                 parent.addView(new Space(mContentView.getContext()), index, lp);
                 flp.gravity = Gravity.BOTTOM;
-                frameLayout.addView(fixedFooter, flp);
+                frameLayout.addView(fixedFooter, 1, flp);
             }
         }
     }
@@ -275,7 +276,7 @@ public class RefreshContentWrapper implements RefreshContent , CoordinatorLayout
     @Override
     public AnimatorUpdateListener scrollContentWhenFinished(final int spinner) {
         if (mScrollableView != null && spinner != 0) {
-            if ((spinner < 0 && canScrollDown(mScrollableView)) || (spinner > 0 && canScrollUp(mScrollableView))) {
+            if ((spinner < 0 && canScrollVertically(mScrollableView, 1)) || (spinner > 0 && canScrollVertically(mScrollableView, -1))) {
                 mLastSpinner = spinner;
                 return this;
             }
@@ -287,13 +288,15 @@ public class RefreshContentWrapper implements RefreshContent , CoordinatorLayout
     public void onAnimationUpdate(ValueAnimator animation) {
         int value = (int) animation.getAnimatedValue();
         try {
+            float dy = (value - mLastSpinner) * mScrollableView.getScaleY();
             if (mScrollableView instanceof AbsListView) {
-                scrollListBy((AbsListView) mScrollableView, value - mLastSpinner);
+                scrollListBy((AbsListView) mScrollableView, (int)dy);
             } else {
-                mScrollableView.scrollBy(0, value - mLastSpinner);
+                mScrollableView.scrollBy(0, (int)dy);
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             //根据用户反馈，此处可能会有BUG
+            e.printStackTrace();
         }
         mLastSpinner = value;
     }

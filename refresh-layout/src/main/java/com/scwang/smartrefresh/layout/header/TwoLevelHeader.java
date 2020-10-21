@@ -28,7 +28,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * Created by SCWANG on 2017/5/26.
  */
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class TwoLevelHeader extends InternalAbstract implements RefreshHeader/*, InvocationHandler*/ {
+public class TwoLevelHeader extends InternalAbstract implements RefreshHeader/*, NestedScrollingParent*/ {
 
     //<editor-fold desc="属性字段">
     protected int mSpinner;
@@ -50,16 +50,13 @@ public class TwoLevelHeader extends InternalAbstract implements RefreshHeader/*,
     //</editor-fold>
 
     //<editor-fold desc="构造方法">
-    public TwoLevelHeader(@NonNull Context context) {
+    public TwoLevelHeader(Context context) {
         this(context, null);
     }
 
-    public TwoLevelHeader(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
+    public TwoLevelHeader(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs, 0);
 
-    public TwoLevelHeader(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
         mSpinnerStyle = SpinnerStyle.FixedBehind;
 
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TwoLevelHeader);
@@ -221,19 +218,32 @@ public class TwoLevelHeader extends InternalAbstract implements RefreshHeader/*,
         final RefreshInternal refreshHeader = mRefreshHeader;
         if (mSpinner != spinner && refreshHeader != null) {
             mSpinner = spinner;
-            switch (refreshHeader.getSpinnerStyle()) {
-                case Translate:
-                    refreshHeader.getView().setTranslationY(spinner);
-                    break;
-                case Scale:{
-                    View view = refreshHeader.getView();
-                    view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getTop() + Math.max(0, spinner));
-                    break;
-                }
+            SpinnerStyle style = refreshHeader.getSpinnerStyle();
+            if (style == SpinnerStyle.Translate) {
+                refreshHeader.getView().setTranslationY(spinner);
+            } else if (style.scale) {
+                View view = refreshHeader.getView();
+                view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getTop() + Math.max(0, spinner));
             }
         }
     }
+
     //</editor-fold>
+
+//    private int mNestedScrollAxes = 0;
+//    @Override
+//    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
+//        return true;
+//    }
+//    public void onNestedScrollAccepted(View child, View target, int nestedScrollAxes) {
+//        mNestedScrollAxes = nestedScrollAxes;
+//    }
+//    public void onStopNestedScroll(View target) {}
+//    public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {}
+//    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed){}
+//    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed){return false;}
+//    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {return false;}
+//    public int getNestedScrollAxes() {return mNestedScrollAxes;}
 
     //<editor-fold desc="开放接口 - API">
 
@@ -264,7 +274,7 @@ public class TwoLevelHeader extends InternalAbstract implements RefreshHeader/*,
             if (refreshHeader.getSpinnerStyle() == SpinnerStyle.FixedBehind) {
                 thisGroup.addView(refreshHeader.getView(), 0, new LayoutParams(width, height));
             } else {
-                thisGroup.addView(refreshHeader.getView(), width, height);
+                thisGroup.addView(refreshHeader.getView(), thisGroup.getChildCount(), new LayoutParams(width, height));
             }
             this.mRefreshHeader = header;
             this.mWrappedInternal = header;

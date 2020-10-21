@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 
 import com.scwang.smartrefresh.header.fungame.FunGameView;
 import com.scwang.smartrefresh.layout.api.RefreshKernel;
-import com.scwang.smartrefresh.layout.util.DensityUtil;
+import com.scwang.smartrefresh.layout.util.SmartUtil;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -130,12 +130,7 @@ public class FunGameBattleCityHeader extends FunGameView {
     }
 
     public FunGameBattleCityHeader(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public FunGameBattleCityHeader(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-
+        super(context, attrs, 0);
         random = new Random();
     }
 
@@ -155,8 +150,8 @@ public class FunGameBattleCityHeader extends FunGameView {
         status = FunGameView.STATUS_GAME_PREPARE;
         controllerPosition = DIVIDING_LINE_SIZE;
 
-        enemySpeed = DensityUtil.dp2px(1);
-        bulletSpeed = DensityUtil.dp2px(4);
+        enemySpeed = SmartUtil.dp2px(1);
+        bulletSpeed = SmartUtil.dp2px(4);
 
         levelNum = DEFAULT_TANK_MAGIC_TOTAL_NUM;
         wipeOutNum = 0;
@@ -222,8 +217,8 @@ public class FunGameBattleCityHeader extends FunGameView {
      */
     protected void upLevel() {
         levelNum += DEFAULT_TANK_MAGIC_TOTAL_NUM;
-        enemySpeed += DensityUtil.dp2px(1);
-        bulletSpeed += DensityUtil.dp2px(1);
+        enemySpeed += SmartUtil.dp2px(1);
+        bulletSpeed += SmartUtil.dp2px(1);
         wipeOutNum = 0;
 
         if (enemyTankSpace > 12)

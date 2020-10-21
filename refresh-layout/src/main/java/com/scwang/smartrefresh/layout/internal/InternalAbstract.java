@@ -1,5 +1,6 @@
 package com.scwang.smartrefresh.layout.internal;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,7 +30,6 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  * 实现 Header 和 Footer 时，继承 InternalAbstract 的话可以少写很多接口方法
  * Created by SCWANG on 2018/2/6.
  */
-
 public abstract class InternalAbstract extends RelativeLayout implements RefreshInternal {
 
     protected View mWrappedView;
@@ -106,7 +106,11 @@ public abstract class InternalAbstract extends RelativeLayout implements Refresh
             }
             if (params != null) {
                 if (params.height == 0 || params.height == MATCH_PARENT) {
-                    return mSpinnerStyle = SpinnerStyle.Scale;
+                    for (SpinnerStyle style : SpinnerStyle.values) {
+                        if (style.scale) {
+                            return mSpinnerStyle = style;
+                        }
+                    }
                 }
             }
         }
@@ -181,5 +185,10 @@ public abstract class InternalAbstract extends RelativeLayout implements Refresh
                 listener.onStateChanged(refreshLayout, oldState, newState);
             }
         }
+    }
+
+    @SuppressLint("RestrictedApi")
+    public boolean setNoMoreData(boolean noMoreData) {
+        return mWrappedInternal instanceof RefreshFooter && ((RefreshFooter) mWrappedInternal).setNoMoreData(noMoreData);
     }
 }

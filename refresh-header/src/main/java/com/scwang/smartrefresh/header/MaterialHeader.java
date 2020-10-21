@@ -25,7 +25,7 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.constant.RefreshState;
 import com.scwang.smartrefresh.layout.constant.SpinnerStyle;
 import com.scwang.smartrefresh.layout.internal.InternalAbstract;
-import com.scwang.smartrefresh.layout.util.DensityUtil;
+import com.scwang.smartrefresh.layout.util.SmartUtil;
 
 import static android.view.View.MeasureSpec.getSize;
 
@@ -60,8 +60,9 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
     protected int mHeadHeight;
     protected Path mBezierPath;
     protected Paint mBezierPaint;
-    protected boolean mShowBezierWave = false;
     protected RefreshState mState;
+    protected boolean mShowBezierWave = false;
+    protected boolean mScrollableWhenRefreshing = true;
 
     //<editor-fold desc="MaterialHeader">
     public MaterialHeader(Context context) {
@@ -69,16 +70,12 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
     }
 
     public MaterialHeader(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public MaterialHeader(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        super(context, attrs, 0);
 
         mSpinnerStyle = SpinnerStyle.MatchLayout;
         final View thisView = this;
         final ViewGroup thisGroup = this;
-        thisView.setMinimumHeight(DensityUtil.dp2px(100));
+        thisView.setMinimumHeight(SmartUtil.dp2px(100));
 
         mProgress = new MaterialProgressDrawable(this);
         mProgress.setBackgroundColor(CIRCLE_BG_LIGHT);
@@ -99,6 +96,7 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
 
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MaterialHeader);
         mShowBezierWave = ta.getBoolean(R.styleable.MaterialHeader_mhShowBezierWave, mShowBezierWave);
+        mScrollableWhenRefreshing = ta.getBoolean(R.styleable.MaterialHeader_mhScrollableWhenRefreshing, mScrollableWhenRefreshing);
         mBezierPaint.setColor(ta.getColor(R.styleable.MaterialHeader_mhPrimaryColor, 0xff11bbff));
         if (ta.hasValue(R.styleable.MaterialHeader_mhShadowRadius)) {
             int radius = ta.getDimensionPixelOffset(R.styleable.MaterialHeader_mhShadowRadius, 0);
@@ -180,6 +178,10 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
 
     @Override
     public void onMoving(boolean isDragging, float percent, int offset, int height, int maxDragHeight) {
+        if (mState == RefreshState.Refreshing) {
+            return;
+        }
+
         if (mShowBezierWave) {
             mHeadHeight = Math.min(offset, height);
             mWaveHeight = Math.max(0, offset - height);
@@ -322,6 +324,29 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
     //<editor-fold desc="API">
 
     /**
+     * Set the background color of the progress spinner disc.
+     *
+     * @param colorRes Resource id of the color.
+     */
+    public void setProgressBackgroundColorSchemeResource(@ColorRes int colorRes) {
+        final View thisView = this;
+        final Context context = thisView.getContext();
+        final int color = ContextCompat.getColor(context, colorRes);
+        setProgressBackgroundColorSchemeColor(color);
+    }
+
+    /**
+     * Set the background color of the progress spinner disc.
+     *
+     * @param color 颜色
+     */
+    public void setProgressBackgroundColorSchemeColor(@ColorInt int color) {
+        final View circle = mCircleView;
+        circle.setBackgroundColor(color);
+        mProgress.setBackgroundColor(color);
+    }
+
+    /**
      * 设置 ColorScheme
      * @param colors ColorScheme
      * @return MaterialHeader
@@ -378,6 +403,15 @@ public class MaterialHeader extends InternalAbstract implements RefreshHeader {
      */
     public MaterialHeader setShowBezierWave(boolean show) {
         this.mShowBezierWave = show;
+        return this;
+    }
+
+    /**
+     * 设置实在正在刷新的时候可以 上下滚动 Header
+     * @param scrollable 是否支持滚动
+     */
+    public MaterialHeader setScrollableWhenRefreshing(boolean scrollable) {
+        this.mScrollableWhenRefreshing = scrollable;
         return this;
     }
 

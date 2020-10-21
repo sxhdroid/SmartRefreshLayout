@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -55,7 +56,7 @@ public class NestedScrollExampleFragmentViewPager extends Fragment {
         });
 
         ViewPager viewPager = root.findViewById(R.id.viewPager);
-        viewPager.setAdapter(new SmartPagerAdapter());
+        viewPager.setAdapter(new SmartPagerAdapter(getChildFragmentManager()));
 
         /*
          * 监听 AppBarLayout 的关闭和开启 ActionButton 设置关闭隐藏动画
@@ -81,12 +82,12 @@ public class NestedScrollExampleFragmentViewPager extends Fragment {
 
     }
 
-    private class SmartPagerAdapter extends FragmentStatePagerAdapter {
+    public static class SmartPagerAdapter extends FragmentStatePagerAdapter {
 
         private final SmartFragment[] fragments;
 
-        SmartPagerAdapter() {
-            super(getChildFragmentManager());
+        SmartPagerAdapter(FragmentManager fm) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.fragments = new SmartFragment[]{
                     new SmartFragment(),new SmartFragment()
             };
