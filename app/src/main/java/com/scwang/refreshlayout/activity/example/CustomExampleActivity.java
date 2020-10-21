@@ -17,15 +17,15 @@ import android.widget.TextView;
 import com.scwang.refreshlayout.R;
 import com.scwang.refreshlayout.adapter.BaseRecyclerAdapter;
 import com.scwang.refreshlayout.adapter.SmartViewHolder;
-import com.scwang.smartrefresh.layout.api.RefreshHeader;
-import com.scwang.smartrefresh.layout.api.RefreshKernel;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.constant.RefreshState;
-import com.scwang.smartrefresh.layout.constant.SpinnerStyle;
-import com.scwang.smartrefresh.layout.internal.ArrowDrawable;
-import com.scwang.smartrefresh.layout.internal.ProgressDrawable;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
-import com.scwang.smartrefresh.layout.util.DensityUtil;
+import com.scwang.smart.drawable.ProgressDrawable;
+import com.scwang.smart.refresh.classics.ArrowDrawable;
+import com.scwang.smart.refresh.layout.api.RefreshHeader;
+import com.scwang.smart.refresh.layout.api.RefreshKernel;
+import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.constant.RefreshState;
+import com.scwang.smart.refresh.layout.constant.SpinnerStyle;
+import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
+import com.scwang.smart.refresh.layout.util.SmartUtil;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,11 +114,11 @@ public class CustomExampleActivity extends AppCompatActivity {
             mProgressView = new ImageView(context);
             mProgressView.setImageDrawable(mProgressDrawable);
             mArrowView.setImageDrawable(new ArrowDrawable());
-            addView(mProgressView, DensityUtil.dp2px(20), DensityUtil.dp2px(20));
-            addView(mArrowView, DensityUtil.dp2px(20), DensityUtil.dp2px(20));
-            addView(new Space(context), DensityUtil.dp2px(20), DensityUtil.dp2px(20));
+            addView(mProgressView, SmartUtil.dp2px(20), SmartUtil.dp2px(20));
+            addView(mArrowView, SmartUtil.dp2px(20), SmartUtil.dp2px(20));
+            addView(new Space(context), SmartUtil.dp2px(20), SmartUtil.dp2px(20));
             addView(mHeaderText, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-            setMinimumHeight(DensityUtil.dp2px(60));
+            setMinimumHeight(SmartUtil.dp2px(60));
         }
         @NonNull
         public View getView() {

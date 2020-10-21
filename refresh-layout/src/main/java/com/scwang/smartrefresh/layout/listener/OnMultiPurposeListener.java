@@ -5,9 +5,8 @@ import com.scwang.smartrefresh.layout.api.RefreshHeader;
 
 /**
  * 多功能监听器
- * Created by SCWANG on 2017/5/26.
+ * Created by scwang on 2017/5/26.
  */
-
 public interface OnMultiPurposeListener extends OnRefreshLoadMoreListener, OnStateChangedListener {
     /**
      * 手指拖动下拉（会连续多次调用，添加isDragging并取代之前的onPulling、onReleasing）
@@ -20,8 +19,6 @@ public interface OnMultiPurposeListener extends OnRefreshLoadMoreListener, OnSta
      */
     void onHeaderMoving(RefreshHeader header, boolean isDragging, float percent, int offset, int headerHeight, int maxDragHeight);
 
-//    void onHeaderPulling(RefreshHeader header, float percent, int offset, int headerHeight, int maxDragHeight);
-//    void onHeaderReleasing(RefreshHeader header, float percent, int offset, int headerHeight, int maxDragHeight);
     void onHeaderReleased(RefreshHeader header, int headerHeight, int maxDragHeight);
     void onHeaderStartAnimator(RefreshHeader header, int headerHeight, int maxDragHeight);
     void onHeaderFinish(RefreshHeader header, boolean success);
@@ -37,8 +34,6 @@ public interface OnMultiPurposeListener extends OnRefreshLoadMoreListener, OnSta
      */
     void onFooterMoving(RefreshFooter footer, boolean isDragging, float percent, int offset, int footerHeight, int maxDragHeight);
 
-//    void onFooterPulling(RefreshFooter footer, float percent, int offset, int footerHeight, int maxDragHeight);
-//    void onFooterReleasing(RefreshFooter footer, float percent, int offset, int footerHeight, int maxDragHeight);
     void onFooterReleased(RefreshFooter footer, int footerHeight, int maxDragHeight);
     void onFooterStartAnimator(RefreshFooter footer, int footerHeight, int maxDragHeight);
     void onFooterFinish(RefreshFooter footer, boolean success);

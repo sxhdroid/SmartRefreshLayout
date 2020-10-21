@@ -33,7 +33,6 @@ public class FeedListPracticeActivity extends AppCompatActivity {
             isFirstEnter = false;
             refreshLayout.autoRefresh();
         }
-
     }
 
 }

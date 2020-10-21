@@ -1,6 +1,5 @@
 package com.scwang.refreshlayout.fragment.index;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -34,15 +33,22 @@ import com.scwang.refreshlayout.activity.style.WaveSwipeStyleActivity;
 import com.scwang.refreshlayout.adapter.BaseRecyclerAdapter;
 import com.scwang.refreshlayout.adapter.SmartViewHolder;
 import com.scwang.refreshlayout.util.StatusBarUtil;
-import com.scwang.smartrefresh.header.DropBoxHeader;
-import com.scwang.smartrefresh.header.FunGameHitBlockHeader;
-import com.scwang.smartrefresh.header.PhoenixHeader;
-import com.scwang.smartrefresh.layout.api.RefreshHeader;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.footer.BallPulseFooter;
-import com.scwang.smartrefresh.layout.header.ClassicsHeader;
-import com.scwang.smartrefresh.layout.impl.RefreshHeaderWrapper;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.scwang.smart.refresh.footer.BallPulseFooter;
+import com.scwang.smart.refresh.header.BezierCircleHeader;
+import com.scwang.smart.refresh.header.ClassicsHeader;
+import com.scwang.smart.refresh.header.DeliveryHeader;
+import com.scwang.smart.refresh.header.DropBoxHeader;
+import com.scwang.smart.refresh.header.FunGameHitBlockHeader;
+import com.scwang.smart.refresh.header.PhoenixHeader;
+import com.scwang.smart.refresh.header.TaurusHeader;
+import com.scwang.smart.refresh.layout.api.RefreshFooter;
+import com.scwang.smart.refresh.layout.api.RefreshHeader;
+import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.constant.RefreshState;
+import com.scwang.smart.refresh.layout.simple.SimpleMultiListener;
+import com.scwang.smart.refresh.layout.util.SmartUtil;
+import com.scwang.smart.refresh.layout.wrapper.RefreshFooterWrapper;
+import com.scwang.smart.refresh.layout.wrapper.RefreshHeaderWrapper;
 
 import java.util.Arrays;
 
@@ -132,18 +138,38 @@ public class RefreshStylesFragment extends Fragment implements AdapterView.OnIte
 
         RefreshLayout refreshLayout = root.findViewById(R.id.refreshLayout);
         if (refreshLayout != null) {
-            refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            refreshLayout.setOnMultiListener(new SimpleMultiListener() {
                 @Override
                 public void onRefresh(@NonNull final RefreshLayout refreshLayout) {
                     refreshLayout.finishRefresh(3000);
-                    refreshLayout.getLayout().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
+                }
+                @Override
+                public void onLoadMore(@NonNull final RefreshLayout refreshLayout) {
+                    refreshLayout.finishLoadMore(2000);
+                }
+                @Override
+                public void onStateChanged(@NonNull RefreshLayout refreshLayout, @NonNull RefreshState oldState, @NonNull RefreshState newState) {
+                    if (newState == RefreshState.None) {
+                        if (oldState == RefreshState.LoadFinish) {
+                            RefreshFooter refreshFooter = refreshLayout.getRefreshFooter();
+                            if (refreshFooter instanceof RefreshFooterWrapper) {
+                                View footerView = refreshFooter.getView();
+                                if (footerView instanceof TaurusHeader) {
+                                    refreshLayout.setRefreshFooter(new RefreshFooterWrapper(new DropBoxHeader(getContext())));
+                                } else if (footerView instanceof DropBoxHeader) {
+                                    refreshLayout.setRefreshFooter(new RefreshFooterWrapper(new DeliveryHeader(getContext())));
+                                } else if (footerView instanceof DeliveryHeader) {
+                                    refreshLayout.setRefreshFooter(new RefreshFooterWrapper(new BezierCircleHeader(getContext())));
+                                } else {
+                                    refreshLayout.setRefreshFooter(new BallPulseFooter(getContext()));
+                                }
+                            }
+                        } else if (oldState == RefreshState.RefreshFinish) {
                             RefreshHeader refreshHeader = refreshLayout.getRefreshHeader();
                             if (refreshHeader instanceof RefreshHeaderWrapper) {
-                                refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));
+                                refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()), ViewGroup.LayoutParams.MATCH_PARENT, SmartUtil.dp2px(100));
                             } else if (refreshHeader instanceof PhoenixHeader) {
-                                refreshLayout.setRefreshHeader(new DropBoxHeader(getContext()));
+                                refreshLayout.setRefreshHeader(new DropBoxHeader(getContext()), ViewGroup.LayoutParams.MATCH_PARENT, SmartUtil.dp2px(150));
                             } else if (refreshHeader instanceof DropBoxHeader) {
                                 refreshLayout.setRefreshHeader(new FunGameHitBlockHeader(getContext()));
                             } else if (refreshHeader instanceof FunGameHitBlockHeader) {
@@ -151,9 +177,8 @@ public class RefreshStylesFragment extends Fragment implements AdapterView.OnIte
                             } else {
                                 refreshLayout.setRefreshHeader(new RefreshHeaderWrapper(new BallPulseFooter(getContext())));
                             }
-                            refreshLayout.setPrimaryColorsId(R.color.colorPrimary, android.R.color.white);
                         }
-                    },4000);
+                    }
                 }
             });
         }
